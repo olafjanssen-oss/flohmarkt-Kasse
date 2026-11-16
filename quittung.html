@@ -1,0 +1,47 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>FLOHMAXX – Digitale Quittung</title><style>body{margin:0;background:#eef3f9;color:#09234c;font:17px/1.45 system-ui,Arial}.no-print{max-width:480px;margin:auto;padding:16px}button{background:#17639d;color:white;border:0;border-radius:10px;padding:14px;font:inherit;width:100%;margin:8px 0}#error{color:#9c1d1d}</style></head><body><div class="no-print"><strong>Deine FLOHMAXX-Quittung</strong><p>Bitte als Screenshot speichern. Du kannst den Link auch über das Teilen-Menü deines Handys weitergeben.</p><button id="share" type="button" hidden>Quittungslink teilen</button><p id="error" role="status"></p></div><div id="receipt"></div><script>(function(){
+'use strict';
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>Number(n).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+function validate(a){
+ if(!Array.isArray(a)||a.length!==14||a[0]!==1)throw Error('Die Quittung ist unvollständig.');
+ if(!Number.isInteger(a[1])||a[1]<1||!/^\d{4}-\d{2}-\d{2}$/.test(a[2]))throw Error('Bonnummer oder Datum ungültig.');
+ for(const i of [2,3,4,5,6,7,11,12,13])if(typeof a[i]!=='string'||a[i].length>3000)throw Error('Quittungsdaten ungültig.');
+ for(const i of [8,9])if(typeof a[i]!=='number'||!Number.isFinite(a[i])||a[i]<0)throw Error('Betrag ungültig.');
+ if(a[9]>a[8]||![0,1].includes(a[10]))throw Error('Zahlungsdaten ungültig.');
+ return a;
+}
+function encode(item,market){
+ const a=validate([1,Number(item.num),market.date,market.place,market.person,item.kind,String(item.meters),String(item.price),Number(item.amount),Number(item.deposit||0),item.payment==='card'?1:0,item.time||'',item.receiptName||'',item.note||'']);
+ const bytes=new TextEncoder().encode(JSON.stringify(a));
+ return btoa(Array.from(bytes,b=>String.fromCharCode(b)).join('')).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decode(code){
+ if(!/^[\w-]+$/.test(code)||code.length>20000)throw Error('Der Quittungslink ist ungültig.');
+ const raw=atob(code.replace(/-/g,'+').replace(/_/g,'/'));
+ return validate(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(raw,c=>c.charCodeAt(0)))));
+}
+function html(a){
+ validate(a);
+ const row=(label,value)=>'<div class="receipt-row"><span>'+esc(label)+'</span><b>'+esc(value)+'</b></div>';
+ const date=a[2].split('-').reverse().join('.');
+ return '<article class="digital-paper"><header><h1>FLOHMAXX</h1><strong>QUITTUNG</strong><p>Marktveranstaltung Janssen GmbH<br>Tannenkrugstraße 36 · 26180 Rastede<br>info@flohmaxx.de · www.flohmaxx.de<br>USt-IdNr.: DE 181984049</p></header>'+(a[12]?'<p class="recipient">Für: '+esc(a[12])+'</p>':'')+row('Bon / Stand',String(a[1]).padStart(3,'0'))+row('Flohmarkt',a[3])+row('Datum',date)+row('Uhrzeit',a[11])+row('Kassierer',a[4])+row('Warenart',a[5])+row('Standlänge',a[6]==='–'?'Pauschal':a[6]+' m')+(a[7]==='–'?'':row('Meterpreis',money(a[7])))+row('Standgeld',money(a[8]-a[9]))+row('Kaution',money(a[9]))+'<div class="receipt-total">'+row('BEZAHLT',money(a[8]))+'</div>'+row('Zahlung',a[10]?'EC-Cash':'Bar')+(a[13]?row('Notiz',a[13]):'')+'<footer>Umsatzsteuerfreie Leistung.<br>Es wird keine Umsatzsteuer berechnet.<p>Bitte diese Quittung zur Nachkontrolle aufbewahren.</p></footer></article>';
+}
+const css='*{box-sizing:border-box}body{margin:0;background:#eef3f9;color:#09234c;font:17px/1.45 system-ui,Arial}.digital-paper{background:white;color:#111;width:100%;max-width:480px;margin:auto;padding:20px}.digital-paper header{background:white;color:#111;text-align:center;padding:0 0 14px}.digital-paper h1{font-size:29px;margin:0 0 3px}.digital-paper header p{font-size:13px;margin:8px 0}.receipt-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #ddd}.receipt-row>span{flex:1}.receipt-row>b{flex:1;text-align:right;overflow-wrap:anywhere}.receipt-total{font-size:23px;margin:12px 0}.digital-paper footer{font-size:12px;text-align:center;margin-top:18px}.recipient{font-weight:bold;overflow-wrap:anywhere;border-block:2px solid #123;padding:12px 0}@media print{body{background:white}.no-print{display:none!important}.digital-paper{max-width:none;padding:0}}';
+window.flohmaxxDigitalReceipt={encode,decode,html,css,document:a=>'<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FLOHMAXX Quittung</title><style>'+css+'</style></head><body>'+html(a)+'</body></html>'};
+})();
+</script><script>
+(function(){'use strict';
+ const api=window.flohmaxxDigitalReceipt,output=document.getElementById('receipt'),error=document.getElementById('error');
+ const style=document.createElement('style');style.textContent=api.css;document.head.appendChild(style);
+ function render(){
+  document.getElementById('share').hidden=true;output.replaceChildren();error.textContent='';
+  try{const a=api.decode(location.hash.slice(1));output.innerHTML=api.html(a);document.title='FLOHMAXX Quittung '+String(a[1]).padStart(3,'0');document.getElementById('share').hidden=false;}
+  catch(e){error.textContent='Diese Quittung konnte nicht geöffnet werden. Bitte den QR-Code erneut scannen oder die Quittung beim Kassierer abfotografieren.';}
+ }
+ document.getElementById('share').addEventListener('click',async()=>{
+  try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(location.href);error.textContent='Link kopiert. Jetzt z. B. in WhatsApp einfügen.';}else error.textContent='Bitte den Link über das Menü deines Browsers teilen.';}
+  catch(e){if(e.name!=='AbortError')error.textContent='Bitte den Link über das Menü deines Browsers teilen.';}
+ });
+ window.addEventListener('hashchange',render);render();
+})();
+</script></body></html>
