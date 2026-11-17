@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>FLOHMAXX – Digitale Quittung</title><style>body{margin:0;background:#eef3f9;color:#09234c;font:17px/1.45 system-ui,Arial}.no-print{max-width:480px;margin:auto;padding:16px}button{background:#17639d;color:white;border:0;border-radius:10px;padding:14px;font:inherit;width:100%;margin:8px 0}#error{color:#9c1d1d}</style></head><body><div class="no-print"><strong>Deine FLOHMAXX-Quittung</strong><p>Bitte als Screenshot speichern. Du kannst den Link auch über das Teilen-Menü deines Handys weitergeben.</p><button id="share" type="button" hidden>Quittungslink teilen</button><p id="error" role="status"></p></div><div id="receipt"></div><script>(function(){
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><title>FLOHMAXX – Digitale Quittung</title><style>body{margin:0;background:#eef3f9;color:#09234c;font:17px/1.45 system-ui,Arial}.no-print{max-width:480px;margin:auto;padding:16px}button{background:#17639d;color:white;border:0;border-radius:10px;padding:14px;font:inherit;width:100%;margin:8px 0}#error{color:#9c1d1d}</style></head><body><div class="no-print"><strong>Deine FLOHMAXX-Quittung</strong><p>Bitte als Screenshot speichern. Über „Quittung als PDF teilen“ kannst du die fertige PDF-Datei weitergeben.</p><button id="share" type="button" hidden>Quittung als PDF teilen</button><p id="error" role="status"></p></div><div id="receipt"></div><script>(function(){
 'use strict';
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>Number(n).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
@@ -29,18 +29,78 @@ function html(a){
 const css='*{box-sizing:border-box}body{margin:0;background:#eef3f9;color:#09234c;font:17px/1.45 system-ui,Arial}.digital-paper{background:white;color:#111;width:100%;max-width:480px;margin:auto;padding:20px}.digital-paper header{background:white;color:#111;text-align:center;padding:0 0 14px}.digital-paper h1{font-size:29px;margin:0 0 3px}.digital-paper header p{font-size:13px;margin:8px 0}.receipt-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #ddd}.receipt-row>span{flex:1}.receipt-row>b{flex:1;text-align:right;overflow-wrap:anywhere}.receipt-total{font-size:23px;margin:12px 0}.digital-paper footer{font-size:12px;text-align:center;margin-top:18px}.recipient{font-weight:bold;overflow-wrap:anywhere;border-block:2px solid #123;padding:12px 0}@media print{body{background:white}.no-print{display:none!important}.digital-paper{max-width:none;padding:0}}';
 window.flohmaxxDigitalReceipt={encode,decode,html,css,document:a=>'<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FLOHMAXX Quittung</title><style>'+css+'</style></head><body>'+html(a)+'</body></html>'};
 })();
-</script><script>
+</script><script id="v139-receipt-pdf">(function(){
+'use strict';
+const api=window.flohmaxxDigitalReceipt,previews=new WeakMap();
+const widths={"Helvetica":[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,761,222,556,333,1000,556,556,333,1000,667,333,1000,761,611,761,761,222,222,333,333,350,556,1000,333,1000,500,333,944,761,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500],"Helvetica-Bold":[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,761,278,556,500,1000,556,556,333,1000,667,333,1000,761,611,761,761,278,278,500,500,350,556,1000,333,1000,556,333,944,761,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556]};
+const codes={'€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,'‡':135,'ˆ':136,'‰':137,'Š':138,'‹':139,'Œ':140,'Ž':142,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,'˜':152,'™':153,'š':154,'›':155,'œ':156,'ž':158,'Ÿ':159};
+const bytes=t=>Array.from(String(t),c=>codes[c]??(c.charCodeAt(0)<=255?c.charCodeAt(0):63));
+const clean=t=>Array.from(String(t).replace(/[\r\n\t]+/g,' '),c=>codes[c]!==undefined||c.charCodeAt(0)<=255?c:'?').join('');
+const width=(t,size,bold=false)=>bytes(t).reduce((sum,n)=>sum+(widths[bold?'Helvetica-Bold':'Helvetica'][n-32]??556),0)*size/1000;
+const money=n=>Number(n).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+function wrap(value,max,size,bold=false){
+ const out=[];let line='';
+ for(const char of clean(value)){
+  if(width(line+char,size,bold)>max&&line){const at=line.lastIndexOf(' ');if(at>0){out.push(line.slice(0,at));line=line.slice(at+1)+char;}else{out.push(line);line=char;}}
+  else line+=char;
+ }
+ if(line||!out.length)out.push(line);return out;
+}
+function makePDF(a){
+ const W=164.41,M=10,R=W-M,C=R-M,ops=[];let y=18;
+ const text=(t,x,top,size,bold=false)=>ops.push({t:clean(t),x,y:top,size,bold});
+ function center(t,size=6.5,bold=false){for(const line of wrap(t,C,size,bold)){text(line,(W-width(line,size,bold))/2,y,size,bold);y+=size+3;}}
+ function rule(){ops.push({line:true,y});y+=12;}
+ function row(label,value,total=false){
+  const size=total?10:7.2,left=total?58:54,right=C-left-6;
+  const labels=wrap(label,left,size,total),values=wrap(value,right,size,true),lines=Math.max(labels.length,values.length);
+  labels.forEach((line,i)=>text(line,M,y+i*(size+3),size,total));
+  values.forEach((line,i)=>text(line,R-width(line,size,true),y+i*(size+3),size,true));
+  y+=lines*(size+3)+4;rule();
+ }
+ center('FLOHMAXX',16,true);center('QUITTUNG',9,true);y+=5;
+ for(const line of ['Marktveranstaltung Janssen GmbH','Tannenkrugstraße 36 · 26180 Rastede','info@flohmaxx.de · www.flohmaxx.de','USt-IdNr.: DE 181984049'])center(line,6.5);
+ y+=10;
+ if(a[12]){text('Quittung für:',M,y,7.2);y+=13;for(const [i,line] of a[12].split('\n').entries()){for(const part of wrap(line,C,8,i===0)){text(part,M,y,8,i===0);y+=11;}}y+=5;rule();}
+ row('Bon / Stand',String(a[1]).padStart(3,'0'));row('Flohmarkt',a[3]);row('Datum',a[2].split('-').reverse().join('.'));row('Uhrzeit',a[11]);row('Kassierer',a[4]);row('Warenart',a[5]);row('Standlänge',a[6]==='–'?'Pauschal':a[6]+' m');
+ if(a[7]!=='–')row('Meterpreis',money(a[7]));
+ row('Standgeld',money(a[8]-a[9]));row('Kaution',money(a[9]));y+=5;row('BEZAHLT',money(a[8]),true);y+=3;row('Zahlung',a[10]?'EC-Cash':'Bar');
+ if(a[13])row('Notiz',a[13]);
+ y+=10;center('Die Vermietungsleistung ist gemäß § 4 Nr. 12a Umsatzsteuergesetz umsatzsteuerfrei.',6);if(!a[12]){y+=6;center('Bitte diese Quittung zur Nachkontrolle aufbewahren.',6);}
+ const H=Math.max(280,y+12),quote=t=>t.replace(/[\\()]/g,'\\$&');
+ const stream=ops.map(op=>op.line?'0.8 G 0.3 w '+M+' '+(H-op.y)+' m '+R+' '+(H-op.y)+' l S':'0 g BT /'+(op.bold?'B':'F')+' '+op.size+' Tf '+op.x.toFixed(3)+' '+(H-op.y).toFixed(3)+' Td ('+quote(op.t)+') Tj ET').join('\n')+'\n';
+ const objects=[null,'<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+W+' '+H+'] /Resources << /Font << /F 4 0 R /B 5 0 R >> >> /Contents 6 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>','<< /Length '+bytes(stream).length+' >>\nstream\n'+stream+'endstream'];
+ const data=[],offsets=[0],push=t=>{for(const n of bytes(t))data.push(n);};push('%PDF-1.4\n');
+ for(let i=1;i<objects.length;i++){offsets[i]=data.length;push(i+' 0 obj\n'+objects[i]+'\nendobj\n');}
+ const xref=data.length;push('xref\n0 '+objects.length+'\n0000000000 65535 f \n');offsets.slice(1).forEach(n=>push(String(n).padStart(10,'0')+' 00000 n \n'));push('trailer\n<< /Size '+objects.length+' /Root 1 0 R >>\nstartxref\n'+xref+'\n%%EOF');
+ return new Blob([new Uint8Array(data)],{type:'application/pdf'});
+}
+window.flohmaxxDigitalReceiptPDF=makePDF;
+})();</script><script>
 (function(){'use strict';
+ let receiptData=null,pdfURL=null;
  const api=window.flohmaxxDigitalReceipt,output=document.getElementById('receipt'),error=document.getElementById('error');
  const style=document.createElement('style');style.textContent=api.css;document.head.appendChild(style);
  function render(){
-  document.getElementById('share').hidden=true;output.replaceChildren();error.textContent='';
-  try{const a=api.decode(location.hash.slice(1));output.innerHTML=api.html(a);document.title='FLOHMAXX Quittung '+String(a[1]).padStart(3,'0');document.getElementById('share').hidden=false;}
+  document.getElementById('share').hidden=true;output.replaceChildren();error.textContent='';receiptData=null;if(pdfURL){URL.revokeObjectURL(pdfURL);pdfURL=null;}
+  try{const a=api.decode(location.hash.slice(1));receiptData=a;output.innerHTML=api.html(a);document.title='FLOHMAXX Quittung '+String(a[1]).padStart(3,'0');document.getElementById('share').hidden=false;}
   catch(e){error.textContent='Diese Quittung konnte nicht geöffnet werden. Bitte den QR-Code erneut scannen oder die Quittung beim Kassierer abfotografieren.';}
  }
  document.getElementById('share').addEventListener('click',async()=>{
-  try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(location.href);error.textContent='Link kopiert. Jetzt z. B. in WhatsApp einfügen.';}else error.textContent='Bitte den Link über das Menü deines Browsers teilen.';}
-  catch(e){if(e.name!=='AbortError')error.textContent='Bitte den Link über das Menü deines Browsers teilen.';}
+  const button=document.getElementById('share');if(!receiptData||button.disabled)return;button.disabled=true;
+  try{
+   const blob=window.flohmaxxDigitalReceiptPDF(receiptData),name='FLOHMAXX_Quittung_'+String(receiptData[1]).padStart(3,'0')+'.pdf';
+   const file=new File([blob],name,{type:'application/pdf'});
+   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:'FLOHMAXX Quittung'});
+   }else{
+    if(pdfURL)URL.revokeObjectURL(pdfURL);pdfURL=URL.createObjectURL(blob);
+    error.replaceChildren();error.appendChild(document.createTextNode('Die PDF ist bereit. Speichere sie und füge sie in WhatsApp oder E-Mail als Dokument hinzu. '));
+    const save=document.createElement('a');save.href=pdfURL;save.download=name;save.textContent='PDF speichern';error.appendChild(save);
+    const open=document.createElement('a');open.href=pdfURL;open.target='_blank';open.rel='noopener';open.textContent=' · PDF öffnen';error.appendChild(open);
+   }
+  }catch(e){if(e.name!=='AbortError')error.textContent='Die PDF konnte nicht geteilt werden. Bitte die Quittung beim Kassierer als PDF anfordern.';}
+  finally{button.disabled=false;}
  });
  window.addEventListener('hashchange',render);render();
 })();
